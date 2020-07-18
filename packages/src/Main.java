@@ -16,5 +16,6 @@ public class Main {
             responseCodes.put(urls[i], futures.elementAt(i).get());
         for (i=0; i<futures.capacity(); ++i)
             System.out.println(urls[i] + " responded with " + responseCodes.get(urls[i]));
+        connectionPool.stopPool();
     }
 }
