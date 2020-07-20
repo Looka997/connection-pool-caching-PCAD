@@ -1,7 +1,7 @@
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,25 +16,24 @@ public class ConnectionPool {
         threadPool = Executors.newCachedThreadPool();
     }
 
-    Future<Integer> OpenConnection(String URL){
+    Future<Integer> OpenConnection(String URL) {
         return threadPool.submit(new Callable<Integer>(){
             @Override
-            public Integer call() throws MalformedURLException, IOException {
+            public Integer call() throws IOException {
                 URL url = new URL(requireNonNull(URL));
-                HttpsURLConnection connect;
                 String protocol;
                 protocol = url.getProtocol();
-
+                URLConnection connect;
                 if (!(protocol.equals("http") || protocol.equals("https")))
                     throw new IOException("connection protocol " + protocol + " not supported");
-                connect = (HttpsURLConnection) url.openConnection();
+                connect = url.openConnection();
                 connect.connect();
-                return connect.getResponseCode();
+                return ((HttpURLConnection) connect).getResponseCode();
             }
         });
     }
 
-    public void stopPool(){
+    synchronized public void stopPool(){
         threadPool.shutdown();
     }
 }
